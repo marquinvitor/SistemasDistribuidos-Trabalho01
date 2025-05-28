@@ -1,4 +1,4 @@
-package main
+package Models
 
 type Estagiario struct{
 	ColaboradorBase
