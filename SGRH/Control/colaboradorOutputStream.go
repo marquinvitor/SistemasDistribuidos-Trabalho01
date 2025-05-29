@@ -3,6 +3,7 @@ package Control
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"meu_rh/Models"
 )
 
@@ -28,11 +29,11 @@ func (cos *ColaboradorOuputStream) EscreverTodosOsDados() error {
 	}
 
 	for _, colab := range cos.Colaboradores {
-		idStr := colab.GetId()
+		idStr := strconv.Itoa(colab.GetId())
 		nome := colab.GetNome()
 		salarioStr := fmt.Sprintf("%.2f", colab.CalcularSalario())
 
-		linha := fmt.Sprintf("ID: %s, Nome: %s Salario: %s", idStr, nome, salarioStr)
+		linha := fmt.Sprintf("|ID: %s, Nome: %s Salario: %s|", idStr, nome, salarioStr)
 
 		dadosBytes := []byte(linha)
 
@@ -42,7 +43,7 @@ func (cos *ColaboradorOuputStream) EscreverTodosOsDados() error {
 			return fmt.Errorf("falha ao escrever os dados: %w", err)
 		}
 
-		fmt.Printf("Foram escritos %d bytes", bytesEscritos)
+		fmt.Printf(" Foram escritos %d bytes", bytesEscritos)
 
 		final := "---\nEnvio concluído.\n"
 		_, err = cos.Destino.Write([]byte(final))
