@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package voting;
+
+option go_package = "voting_system/proto"; // IMPORTANT: Matches module path
+
+// User type
+enum UserType {
+  ELECTOR = 0;
+  ADMIN = 1;
+}
+
+// Candidate information
+message Candidate {
+  string id = 1;
+  string name = 2;
+  int32 vote_count = 3;    // Used in results
+  double percentage = 4; // Used in results
+}
+
+// Requests & Responses
+message GenericRequest {
+  enum Type {
+    LOGIN = 0;
+    GET_CANDIDATES = 1;
+    SUBMIT_VOTE = 2;
+    ADD_CANDIDATE = 3;    // Admin
+    REMOVE_CANDIDATE = 4; // Admin
+  }
+  Type type = 1;
+  bytes payload = 2; // Contains the serialized specific request message
+  string token = 3; // Optional: for session management after login
+}
+
+message GenericResponse {
+ enum Type {
+    GENERAL_STATUS = 0;
+    LOGIN_SUCCESS_ELECTOR = 1;
+    LOGIN_SUCCESS_ADMIN = 2;
+    CANDIDATE_LIST = 3;
+    VOTE_ACK = 4;
+    ADMIN_ACTION_ACK = 5;
+    ELECTION_RESULTS = 6;
+  }
+  Type type = 1;
+  bytes payload = 2; // Contains the serialized specific response message
+  string message = 3; // General status message (e.g., error message)
+  bool success = 4;
+}
+
+
+// Specific Payloads for GenericRequest/GenericResponse
+message LoginPayload {
+  string user_id = 1;
+  string password = 2;
+  UserType user_type = 3;
+}
+
+message CandidateListPayload {
+  repeated Candidate candidates = 1;
+  string voting_deadline = 2; // ISO 8601 format
+}
+
+message SubmitVotePayload {
+  string elector_id = 1; 
+  string candidate_id = 2;
+}
+
+message AddCandidatePayload { // Admin
+  Candidate candidate = 1;
+}
+
+message RemoveCandidatePayload { // Admin
+  string candidate_id = 1;
+}
+
+message ElectionResultsPayload {
+  int32 total_votes = 1;
+  repeated Candidate candidate_results = 2;
+  Candidate winner = 3;
+  string status_message = 4; 
+}
+
+// For UDP Multicast (Informative Note from Admin)
+message InformativeNote {
+  string admin_id = 1;
+  string content = 2;
+  string timestamp = 3; // ISO 8601 format
+}
