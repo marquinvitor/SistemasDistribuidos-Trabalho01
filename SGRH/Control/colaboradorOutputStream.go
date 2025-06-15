@@ -28,30 +28,30 @@ func (cos *ColaboradorOuputStream) EscreverTodosOsDados() error {
 		return fmt.Errorf("falha ao escrever cabecalho: %w", err)
 	}
 
+	if numObjetos == 0 { 
+		return nil
+	}
+
 	for _, colab := range cos.Colaboradores {
 		idStr := strconv.Itoa(colab.GetId())
 		nome := colab.GetNome()
 		salarioStr := fmt.Sprintf("%.2f", colab.CalcularSalario())
 
-		linha := fmt.Sprintf("|ID: %s, Nome: %s Salario: %s|", idStr, nome, salarioStr)
+		linha := fmt.Sprintf("|ID: %s, Nome: %s Salario: %s|\n", idStr, nome, salarioStr)
 
 		dadosBytes := []byte(linha)
-
 		bytesEscritos, err := cos.Destino.Write(dadosBytes)
-
 		if err != nil {
-			return fmt.Errorf("falha ao escrever os dados: %w", err)
+			return fmt.Errorf("falha ao escrever os dados do colaborador ID %s: %w", idStr, err)
 		}
 
-		fmt.Printf(" Foram escritos %d bytes", bytesEscritos)
+		fmt.Printf(" Foram escritos %d bytes para o colaborador ID %s", bytesEscritos, idStr)
 
 		final := "---\nEnvio concluído.\n"
 		_, err = cos.Destino.Write([]byte(final))
-
 		if err != nil {
-			return fmt.Errorf("falha ao escrever finalização: %w", err)
+			return fmt.Errorf("falha ao escrever finalizacao para o colaborador ID %s: %w", idStr, err)
 		}
-
 	}
 	return nil
 }
