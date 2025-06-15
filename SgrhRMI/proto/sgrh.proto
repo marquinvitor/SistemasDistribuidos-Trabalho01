@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "SGRH/proto";
+
+// O serviço que define as operações remotas
+service SGRH {
+  rpc AdicionarColaborador(AddColaboradorRequest) returns (SGRHResponse) {}
+  rpc DemitirColaborador(DemitirColaboradorRequest) returns (SGRHResponse) {}
+  rpc ListarColaboradores(ListarColaboradoresRequest) returns (ListarColaboradoresResponse) {}
+  rpc CalcularFolhaSalarial(CalcularFolhaSalarialRequest) returns (CalcularFolhaSalarialResponse) {}
+}
+
+// ---- Definições das Mensagens ----
+
+// Tipos de Colaborador
+enum TipoColaborador {
+  EFETIVO = 0;
+  AUTONOMO = 1;
+  ESTAGIARIO = 2;
+}
+
+message Colaborador {
+  int32 id = 1;
+  string nome = 2;
+  TipoColaborador tipo = 3;
+  
+  // Apenas um destes campos será preenchido, baseado no tipo
+  oneof detalhes_salario {
+    double salario_mensal = 4; // Para Efetivo
+    DetalhesAutonomo autonomo = 5;  // Para Autonomo
+    double auxilio_estagio = 6; // Para Estagiario
+  }
+}
+
+message DetalhesAutonomo {
+  double valor_hora = 1;
+  int32 horas_trabalhadas = 2;
+}
+
+// ---- Mensagens de Requisição e Resposta ----
+
+message AddColaboradorRequest {
+  string nome_departamento = 1;
+  Colaborador colaborador = 2;
+}
+
+message DemitirColaboradorRequest {
+  string nome_departamento = 1;
+  int32 colaborador_id = 2;
+}
+
+message ListarColaboradoresRequest {
+  string nome_departamento = 1;
+}
+
+message ListarColaboradoresResponse {
+  repeated Colaborador colaboradores = 1;
+}
+
+message CalcularFolhaSalarialRequest {
+  string nome_departamento = 1;
+}
+
+message CalcularFolhaSalarialResponse {
+  double total_folha = 1;
+}
+
+// Resposta genérica para operações simples
+message SGRHResponse {
+  bool success = 1;
+  string message = 2;
+}
