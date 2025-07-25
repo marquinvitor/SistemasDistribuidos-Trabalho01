@@ -7,7 +7,7 @@ async function adicionarColaborador() {
   const { departamento, tipo } = await inquirer.prompt([
     {
       name: "departamento",
-      message: "Nome do departamento (TI | RH):",
+      message: "Nome do departamento:",
       type: "input",
     },
     {
@@ -108,6 +108,7 @@ async function demitirColaborador() {
 
 async function menu() {
   while (true) {
+    console.log("Departamentos disponíveis: TI | RH\n");
     const { escolha } = await inquirer.prompt([
       {
         name: "escolha",
