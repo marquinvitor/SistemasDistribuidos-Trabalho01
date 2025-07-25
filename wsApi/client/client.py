@@ -1,4 +1,3 @@
-
 import requests
 import json
 
@@ -11,7 +10,7 @@ class APIClient:
         try:
             response = requests.request(method, url, **kwargs)
             response.raise_for_status()
-            if response.status_code == 204: 
+            if response.status_code == 204:
                 return {"success": True, "message": "Operação realizada com sucesso."}
             if response.text:
                 return response.json()
@@ -33,87 +32,95 @@ class APIClient:
 
 
 def exibir_menu():
-    """Mostra o menu de opções para o usuário."""
-    """Departamentos Existentes: TI | RH"""
     print("\n--- Gerenciador de Colaboradores ---")
-    print("--- Departamentos Existentes: TI | RH ---\n")
+    print("Departamentos disponíveis: TI | RH\n")
     print("1. Adicionar Colaborador")
     print("2. Listar Colaboradores de um Departamento")
     print("3. Calcular Folha Salarial de um Departamento")
     print("4. Demitir Colaborador")
-    print("0. Sair")
+    print("0. Sair\n")
     return input("Escolha uma opção: ")
 
+
 def ui_adicionar_colaborador(client: APIClient):
-    """Lida com a lógica de pedir os dados de um novo colaborador."""
-    nome_depto = input("Digite o nome do departamento: ")
-    print("Qual o tipo do colaborador?")
+    print("\n--- Adicionar Colaborador ---\n")
+    nome_depto = input("Departamento: ")
+
+    print("\nTipo do colaborador:")
     print("  1. Efetivo")
     print("  2. Autônomo")
     print("  3. Estagiário")
-    tipo_escolha = input("Escolha o tipo: ")
+    tipo_escolha = input("Escolha o tipo (1-3): ")
 
     dados = {}
     try:
-        dados['id'] = int(input("Digite o ID do colaborador: "))
-        dados['nome'] = input("Digite o nome do colaborador: ")
-        
+        dados['id'] = int(input("\nID do colaborador: "))
+        dados['nome'] = input("Nome do colaborador: ")
+
         if tipo_escolha == '1':
             dados['tipo'] = 'efetivo'
-            dados['salario_mensal'] = float(input("Digite o salário mensal: "))
+            dados['salario_mensal'] = float(input("Salário mensal: "))
         elif tipo_escolha == '2':
             dados['tipo'] = 'autonomo'
-            dados['horas_trabalhadas'] = int(input("Digite as horas trabalhadas: "))
-            dados['valor_hora'] = float(input("Digite o valor por hora: "))
+            dados['horas_trabalhadas'] = int(input("Horas trabalhadas: "))
+            dados['valor_hora'] = float(input("Valor por hora: "))
         elif tipo_escolha == '3':
             dados['tipo'] = 'estagiario'
-            dados['auxilio_estagio'] = float(input("Digite o valor do auxílio estágio: "))
+            dados['auxilio_estagio'] = float(input("Valor do auxílio estágio: "))
         else:
-            print("Tipo inválido!")
+            print("\nTipo inválido.")
             return
     except ValueError:
-        print("Erro: Valor numérico inválido inserido.")
+        print("\nErro: valor numérico inválido.")
         return
 
     resultado = client.adicionar_colaborador(nome_depto, dados)
-    print("\n>>> Resultado: Colaborador adicionado com sucesso!")
+    print("\nColaborador adicionado com sucesso.\n")
+
 
 def ui_listar_colaboradores(client: APIClient):
-    nome_depto = input("Digite o nome do departamento para listar: ")
+    print("\n--- Listar Colaboradores ---\n")
+    nome_depto = input("Departamento: ")
     resultado = client.listar_colaboradores(nome_depto)
+
     if resultado:
-        print("\n--- Colaboradores ---")
+        print("\nColaboradores:\n")
         print(json.dumps(resultado, indent=2, ensure_ascii=False))
     else:
-        print("Nenhum colaborador encontrado ou departamento não existe.")
+        print("\nNenhum colaborador encontrado ou departamento inexistente.\n")
+
 
 def ui_calcular_folha(client: APIClient):
-    nome_depto = input("Digite o nome do departamento para calcular a folha: ")
+    print("\n--- Calcular Folha Salarial ---\n")
+    nome_depto = input("Departamento: ")
     resultado = client.calcular_folha_salarial(nome_depto)
+
     if resultado:
-        print("\n--- Folha Salarial ---")
+        print("\nFolha Salarial:\n")
         print(json.dumps(resultado, indent=2, ensure_ascii=False))
     else:
-        print("Não foi possível calcular a folha.")
+        print("\nNão foi possível calcular a folha.\n")
+
 
 def ui_demitir_colaborador(client: APIClient):
-    nome_depto = input("Digite o nome do departamento: ")
+    print("\n--- Demitir Colaborador ---\n")
+    nome_depto = input("Departamento: ")
     try:
-        colab_id = int(input("Digite o ID do colaborador a ser demitido: "))
+        colab_id = int(input("ID do colaborador a ser demitido: "))
     except ValueError:
-        print("Erro: ID deve ser um número.")
+        print("\nErro: ID deve ser um número.")
         return
-        
-    client.demitir_colaborador(nome_depto, colab_id)
-    print(f"\n>>> Tentativa de demissão do colaborador ID {colab_id} enviada.")
+
+    resultado = client.demitir_colaborador(nome_depto, colab_id)
+    print(f"\nResultado: {resultado.get('message', 'Solicitação enviada.')}\n")
 
 
 if __name__ == "__main__":
     api_client = APIClient()
-    
+
     while True:
         escolha = exibir_menu()
-        
+
         if escolha == '1':
             ui_adicionar_colaborador(api_client)
         elif escolha == '2':
@@ -123,9 +130,9 @@ if __name__ == "__main__":
         elif escolha == '4':
             ui_demitir_colaborador(api_client)
         elif escolha == '0':
-            print("Saindo do programa. Até mais!")
+            print("\nSaindo do programa.\n")
             break
         else:
-            print("Opção inválida. Tente novamente.")
-        
-        input("\nPressione Enter para continuar...")
+            print("\nOpção inválida.\n")
+
+        input("Pressione Enter para continuar...")
